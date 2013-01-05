@@ -22,3 +22,13 @@ void sleepNow(){
   ledBlink(1,225);
 }
 
+
+void ledBlink(byte times, byte period){
+  
+  for(int i=0;i<times;i++){
+    digitalWrite(13,HIGH);
+    delay(period);
+    digitalWrite(13,LOW);
+    delay(period);
+  }
+}

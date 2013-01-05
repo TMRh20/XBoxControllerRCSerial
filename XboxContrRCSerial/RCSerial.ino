@@ -3,27 +3,16 @@ char buffCount = 0;
 
 //Construct MSP_SET_RAW_RC packet
 //format $M>[length][code][data][checksum]
+
 void sendRawRC(){
   
   //Fill array with data to send for RC Control
   buffer8(16); //length
-  buffer8(200); //code
+  buffer8(MSP_SET_RAW_RC); //code
   for(int i=0; i<8;i++){       
     buffer16(channels[i]); //data (length = 8*2 bytes)
-  }
-  
+  }  
   sendBuffer(); //add checksum value and send the data
-}
-
-//Construct custom MSP_PLAY packet
-//Added to MultiWii to control a music player
-void play(byte whichCmd){
-  
- buffer8(1);
- buffer8(150);
- buffer8(whichCmd); 
- sendBuffer();
-  
 }
 
 

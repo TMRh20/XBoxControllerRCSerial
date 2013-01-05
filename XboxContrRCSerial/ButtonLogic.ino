@@ -1,67 +1,72 @@
 
 
+unsigned long bTimers[13];
+int sel = 0;
 
 void buttonLogic(){
-   if(millis()- bTimer < 250){ return;}
-   
-  //Check the Select and Start buttons
-  //Used to toggle mode of A,B,X,Y buttons
-  int sel = 0;
-    if(digitalRead(A5)==LOW){ //Back button
-      slpTimer = millis();
-      bTimer = millis();
-      sel = 1;
-    }
-    if(digitalRead(A4)==LOW){ //Start button
-        slpTimer = millis();
-        bTimer = millis();
-        sel = 2;
-    }
-    
+ 
+  //Check the Select, Start and Black buttons
+  //Used to toggle mode of A,B,X,Y,U,D,L,R buttons
+  
+  boolean mode[3] = {digitalRead(A4),digitalRead(10),digitalRead(A5)}; //back,start,black buttons
+
+  for(int i=0; i<3; i++){
+    if(!mode[i]){
+       ledBlink(1,1);
+       slpTimer = millis(); 
+       sel = i;         
+     }    
+  }
+  
+
+boolean buttonSend = 0;
+
 //now read through ABXY,UDLR and black buttons    
-for(int i=2; i<11; i++){
-    if(digitalRead(i) == LOW){ //if a button is toggled, do the following
-      bTimer = millis();
+for(int i=2; i<10; i++){
+    if(digitalRead(i) == LOW && millis() - bTimers[i] > 250){ //if a button is toggled, and hasn't been toggled for 250ms, do the following
+      ledBlink(1,3);
+      bTimers[i] = millis();
       slpTimer = millis();
-      if(sel == 1){            //apply different actions depending on the mode specified by Back and Start buttons
+      if(sel == 0){            //apply different actions depending on the mode specified by Back and Start buttons
                 switch(i){
-                  case 2: play(9);break;
-                  case 3: play(7); break;
-                  case 4: play(8); break; //aux2
-                  case 5: break;  
-                  case 6: play(8); break;
-                  case 7: play(9); break;
-                  case 8: break;
-                  case 9: break;
-                  //default: Serial.println(butArr[i]); break;
+                  case 2: break;               //A
+                  case 3: trimYaw++; break;    //B
+                  case 4: break;               //Y
+                  case 5: trimYaw--; break;    //X
+                  case 6: trimPitch++; break;  //Up
+                  case 7: trimPitch--; break;  //Dn
+                  case 8: trimRoll--; break;   //R
+                  case 9: trimRoll++; break;   //L
                 }
       }else
-      if(sel == 2){         
+      if(sel == 2){
+                buttonSend = 1;        
                 switch(i){
-                  case 2: sleepNow(); break;
+                  case 2: break;
                   case 3: break;
-                  case 4: *aux1 = 1500; break; //aux2
+                  case 4: *aux1 = 1500; break;
                   case 5: *aux2 = 1500; break;  
                   case 6: *aux1 = 2000; break;
                   case 7: *aux1 = 1000; break;
                   case 8: *aux2 = 1000; break;
                   case 9: *aux2 = 2000; break;
-                  //default: Serial.println(butArr[i]); break;
                 }       
       }else{
-        
+                buttonSend = 1;
                 switch(i){
-                  case 2: play(1); break; //play tune 1
-                  case 3: play(2); break; //play tune 2
-                  case 4: play(3); break; //play tune 3
-                  case 5: play(4); break; //play tune 4
-                  case 6: play(5); break; //tune 5
-                  case 7: play(6); break; //tune 6
-                  case 8: play(8); break; //volUp
-                  case 9: play(9); break; //volDn
-                  //default: Serial.println(butArr[i]); break;
+                  case 2: break;
+                  case 3: break;
+                  case 4: *aux3 = 1500; break;
+                  case 5: *aux4 = 1500; break;
+                  case 6: *aux3 = 2000; break;
+                  case 7: *aux3 = 1000; break;
+                  case 8: *aux4 = 2000; break;
+                  case 9: *aux4 = 1000; break;
                 }
       }
-    }
+    } 
+  }
+  if(buttonSend){ sendRawRC(); }
 }
-}
+
+
