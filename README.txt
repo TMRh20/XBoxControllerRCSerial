@@ -1,9 +1,13 @@
 
 ************************************************************************************
+
 XBox Controller: RCSerial
 
 Sketch for using an Arduino-converted XBox Controller to control multirotor craft using
 MultiWii flight control software.
+
+
+************************************************************************************
 
 Requirements:
 
@@ -11,12 +15,19 @@ XBox controller:
   Embedded Arduino Nano/Mini/etc.
   Serial Based Wireless Module (APC220, XBee, etc)
 
-MultiWii:
-  Works with latest release (MultiWii_dev_r1240.zip)
-  Customized version coming soon to enable failsafe and extra functions
-  
-    
 
+************************************************************************************
+
+MultiWii:
+ Code base is MultiWii_dev_r1240
+
+ Slightly modified version included:  (main changes on TMRh20 tab, others marked with tmrh)
+  - Supports serial rc cmds with smaller payloads
+  - Supports failsafe when using serial RC
+  - Supports basic monitoring during flight via processing gui (prev. post)
+  - Still unsure whether to remove or work with test code to provide sound output from alarm triggers etc. so I left it in
+  - Modified ESC calibration code specific to MultiStar ESCs
+  
 ************************************************************************************
 
 --Controls--
@@ -35,6 +46,8 @@ Buttons:
 
 Mode 0 (Start Button):
 
+//Trimming this way is only good when maintaining a fixed heading.
+//Will probably do custom commands for easy trim control
 A: Wake Up
 B: Yaw Trim +
 Y: n/a
@@ -68,7 +81,6 @@ L: aux4 = 2000;
 
 
 ************************************************************************************
-
 
 
 Details at http://TMRh20.blogspot.com

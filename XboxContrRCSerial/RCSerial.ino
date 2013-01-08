@@ -15,6 +15,24 @@ void sendRawRC(){
   sendBuffer(); //add checksum value and send the data
 }
 
+//custom RC data w/smaller payload
+void sendMyRC(){    
+  buffer8(8);
+  buffer8(MSP_MYRC);
+  for(int i=0; i<4;i++){
+    buffer16(channels[i]);
+  }
+  sendBuffer();
+}
+
+void sendMyAux(){    
+  buffer8(8);
+  buffer8(MSP_MYAUX);
+  for(int i=4; i<8;i++){
+    buffer16(channels[i]);
+  }
+  sendBuffer();
+}
 
 
 //Functions for converting and loading data into a sending buffer

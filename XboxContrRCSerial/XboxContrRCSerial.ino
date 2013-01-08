@@ -5,8 +5,8 @@
 #define rxPin 10
 #define txPin 11
 #define MSP_SET_RAW_RC 200
-#define MYRC 199
-#define MYAUX 198
+#define MSP_MYRC 199
+#define MSP_MYAUX 198
 
 
 SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
@@ -66,7 +66,7 @@ void loop(){
       slpTimer = millis();
     }
     jTimer = tmp;
-    sendRawRC();  //send the data
+    sendMyRC();  //send the data
   }
 }
 
