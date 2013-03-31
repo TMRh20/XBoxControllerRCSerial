@@ -83,6 +83,7 @@ const uint32_t PROGMEM capability = 0+BIND_CAPABLE;
 #define MSP_PLAY                 150   //in message          test
 #define MSP_MY_RC                199   //in message          roll,pitch,yaw,throttle only, no reply
 #define MSP_MY_AUX               198   //in message          aux1,aux2,aux3,aux4
+#define MSP_MY_INFO              197
 
 static uint8_t checksum[UART_NUMBER];
 static uint8_t indRX[UART_NUMBER];
@@ -109,6 +110,7 @@ uint8_t read8()  {
 }
 
 void headSerialResponse(uint8_t err, uint8_t s) {
+  serialize8('*');   //TMRh20
   serialize8('$');
   serialize8('M');
   serialize8(err ? '!' : '>');
@@ -134,6 +136,9 @@ void serializeNames(PGM_P s) {
     serialize8(pgm_read_byte(c));
   }
 }
+
+//tmrh20
+unsigned int rxCnt1=0;
 
 void serialCom() {
   uint8_t c,n;  
@@ -164,7 +169,7 @@ void serialCom() {
     #if defined(SPEKTRUM) && (UART_NUMBER > 1)
       #define SPEK_COND  && (SPEK_SERIAL_PORT != CURRENTPORT)
     #endif
-    while (SerialAvailable(CURRENTPORT) GPS_COND SPEK_COND) {
+    while(SerialAvailable(CURRENTPORT) GPS_COND SPEK_COND) {
       uint8_t bytesTXBuff = ((uint8_t)(serialHeadTX[CURRENTPORT]-serialTailTX[CURRENTPORT]))%TX_BUFFER_SIZE; // indicates the number of occupied bytes in TX buffer
       if (bytesTXBuff > TX_BUFFER_SIZE - 50 ) return; // ensure there is enough free TX buffer to go further (50 bytes margin)
       c = SerialRead(CURRENTPORT);
@@ -203,13 +208,16 @@ void serialCom() {
             evaluateCommand();  // we got a valid packet, evaluate it
           }
           c_state[CURRENTPORT] = IDLE;
+          
         }
       #endif // SUPPRESS_ALL_SERIAL_MSP
+      //if(CURRENTPORT==3){break;}
     }
   }
 }
 #ifndef SUPPRESS_ALL_SERIAL_MSP
 void evaluateCommand() {
+  boolean noTail =0;
   byte playVal = 0;
   switch(cmdMSP[CURRENTPORT]) {
 //   case MSP_SET_RAW_RC:
@@ -219,17 +227,19 @@ void evaluateCommand() {
 //     headSerialReply(0);
 //     break;
    
-   //tmrh20 
-   case MSP_PLAY:
-     playVal = read8();     
-     tmrTunes(playVal);            
-     break;
+//   //tmrh20 
      
    case MSP_MY_RC:
     for(uint8_t i=0;i<4;i++) {
-       rcData[i] = read16();       
+       rcData[i] = map(read8(),0,250,1000,2000);       
     }
-    //tryNSendGPS();
+    noTail=1;
+    #if defined(RCSERIAL)
+      if(f.ARMED ){
+        tryNSendInfo();
+      }
+    #endif
+    ++rxCnt1;
     rcTimer=millis();
     break;
    
@@ -244,6 +254,8 @@ void evaluateCommand() {
      for(uint8_t i=0;i<8;i++) {
        rcData[i] = read16();
      }
+     ++rxCnt1;
+     noTail=1;
      //headSerialReply(0);
      //TMRh20
      rcTimer=millis();     
@@ -563,7 +575,8 @@ void evaluateCommand() {
      headSerialError(0);
      break;
   }
-  tailSerialReply();
+  //TMRh20
+  if(!noTail){ tailSerialReply(); }
 }
 #endif // SUPPRESS_ALL_SERIAL_MSP
 

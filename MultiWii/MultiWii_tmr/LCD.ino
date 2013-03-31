@@ -505,7 +505,7 @@ void LCDprint(uint8_t i) {
     LCDPIN_ON //switch ON digital PIN 0
     delayMicroseconds(BITDELAY);
   #elif defined(LCD_TEXTSTAR) || defined(LCD_VT100) || defined(LCD_TTY)
-    SerialWrite(LCD_SERIAL_PORT, i );
+    SerialWrite(LCD_SERIAL_PORT, i ); 
   #elif defined(LCD_ETPP)
     i2c_ETPP_send_char(i);
   #elif defined(LCD_LCD03)
@@ -1362,7 +1362,7 @@ void configurationLoop() {
     #endif
     #if defined(LCD_TEXTSTAR) || defined(LCD_VT100) || defined(LCD_TTY) // textstar, vt100 and tty can send keys
       key = ( SerialAvailable(LCD_SERIAL_PORT) ? SerialRead(LCD_SERIAL_PORT) : 0 );
-    #endif
+     #endif
     #ifdef LCD_CONF_DEBUG
       delay(1000);
       if (key == LCD_MENU_NEXT) key=LCD_VALUE_UP; else key = LCD_MENU_NEXT;

@@ -249,9 +249,7 @@ struct flags_struct {
 } f;
 
 ////TMRh20
-unsigned long rcTimer = 0;
-uint16_t testV = 0;
-unsigned long datTimer = 0;
+unsigned long rcTimer = 0, datTimer = 0;
 
 //for log
 #if defined(LOG_VALUES) || defined(LCD_TELEMETRY)
@@ -574,7 +572,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
       if (! (++vbatTimer % VBATFREQ)) {
         vbatRawArray[(ind++)%8] = analogRead(V_BATPIN);
         for (uint8_t i=0;i<8;i++) vbatRaw += vbatRawArray[i];
-        vbat = (vbatRaw*2) / conf.vbatscale; // result is Vbatt in 0.1V steps
+        vbat = (vbatRaw*2) / VBATSCALE; // result is Vbatt in 0.1V steps
       }
     #endif
     alarmHandler(); // external buzzer routine that handles buzzer events globally now
@@ -875,8 +873,10 @@ void loop () {
   static int16_t initialThrottleHold;
   static uint32_t timestamp_fixated = 0;
 
+#if defined(RCSERIAL)
   //tmrh
   tmr();
+#endif
   
   #if defined(SPEKTRUM)
     if (spekFrameFlags == 0x01) readSpektrum();
