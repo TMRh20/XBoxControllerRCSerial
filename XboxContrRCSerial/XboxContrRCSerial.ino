@@ -1,44 +1,44 @@
+#include <MemoryFree.h>
+
 #include <SoftwareSerial.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
 
-#define rxPin 10
-#define txPin 11
+#define rxPin 10 //not actually used
+#define txPin 11 
 #define MSP_SET_RAW_RC 200
 #define MSP_MYRC 199
-#define MSP_MYAUX 198
 
-
-SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
+SoftwareSerial mySerial(rxPin, txPin);
 
 //declare 8 channels and configure some pointers for ease of use
 int channels[8];
 int *roll = &channels[0], *pitch = &channels[1], *yaw = &channels[2], *throttle = &channels[3];
 int *aux1= &channels[4],*aux2=&channels[5],*aux3=&channels[6],*aux4=&channels[7];
 
-int jCenter = 1500;
+int altThrottle = 1000, bttnCnt = 0;;
 int trigZero[3] = {1,1};
-int trimRoll = 0, trimPitch = 0, trimYaw = 0;
 
-unsigned long jTimer = 0;
-unsigned long slpTimer = 0;
-char toSend[42];
+unsigned long jTimer = 0, slpTimer = 0, blinkLength = 0;;
+char toSend[45];
 byte checksum = 0;
-
+boolean altHold = 0;
+boolean buttonSend = 0;
+unsigned long lcdTimer = 0;
 
 
 void setup(){
   
   *aux1=1500;*aux2=1500;*aux3=1500;*aux4=1500;
 
-  pinMode(12,OUTPUT); digitalWrite(12,HIGH);
+  pinMode(12,OUTPUT); digitalWrite(12,HIGH); //APC220 SET pin, low activates
   pinMode(13,OUTPUT);
   
   Serial.begin(115200);
   Serial.println("st");
   mySerial.begin(57600);  
 
-  for(int i=2; i<11; i++){
+  for(int i=2; i<11; i++){ //turn pullups on for all the buttons
     pinMode(i,INPUT_PULLUP); 
   } 
   pinMode(A4,INPUT_PULLUP);
@@ -46,27 +46,54 @@ void setup(){
   trigZero[0] = analogRead(A6); 
   trigZero[1] = analogRead(A7);
   
+//  mySerial.end();
+//  delay(220);
+//  mySerial.begin(9600);
+//  delay(100);
+//  digitalWrite(12,LOW);
+//  delay(220);
+//  char* tesst = "WR 450000 4 9 6 0";
+//  mySerial.println(tesst);
+//  delay(250);
+//  digitalWrite(12,HIGH);
+//  mySerial.end();
+//  delay(220);
+//  mySerial.begin(57600);
 }
 
 
 
 void loop(){
+  
+  if(micros() > blinkLength ){
+    digitalWrite(13,LOW); 
+  }
+  
 
   //sleep if throttle not being applied for 5 seconds or more
-  if(millis() - slpTimer > 5000){digitalWrite(13,LOW); sleepNow();}
+  if(micros() - slpTimer > 5000000){digitalWrite(13,LOW); sleepNow();}
     
   //check button status
     buttonLogic(); //function for reading button status and determining what to do
-      
-  unsigned long tmp = millis();  
-  if(tmp - jTimer > 90){ //start sending dataCmds every 90ms  
+  
+  unsigned long DL = 22000; //Adjust delay depending on command to be sent
+  if(buttonSend){DL = 65000;}
+  
+  if(micros() - jTimer > DL){ //start sending dataCmds every 75ms
+    
     getRollPitchYawThrottle(); //function to get readings from joysticks
     
-    if(*throttle > 1005){ //if throttle is being applied, reset sleep timer
-      slpTimer = millis();
+    if(*throttle > 1010){ //1005//if throttle is being applied, reset sleep timer
+      slpTimer = micros();
+    }   
+    
+    if(buttonSend){
+      bttnCnt++; if(bttnCnt >= 15){ bttnCnt=0; buttonSend = 0; }       
+      sendRawRC();  //send the full data
+    }else{
+      sendMyRC(); 
     }
-    jTimer = tmp;
-    sendMyRC();  //send the data
+    jTimer = micros();
   }
 }
 

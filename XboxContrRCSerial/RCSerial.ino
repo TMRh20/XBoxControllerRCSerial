@@ -5,7 +5,6 @@ char buffCount = 0;
 //format $M>[length][code][data][checksum]
 
 void sendRawRC(){
-  
   //Fill array with data to send for RC Control
   buffer8(16); //length
   buffer8(MSP_SET_RAW_RC); //code
@@ -15,22 +14,25 @@ void sendRawRC(){
   sendBuffer(); //add checksum value and send the data
 }
 
-//custom RC data w/smaller payload
-void sendMyRC(){    
-  buffer8(8);
-  buffer8(MSP_MYRC);
-  for(int i=0; i<4;i++){
-    buffer16(channels[i]);
-  }
-  sendBuffer();
-}
+//void sendMyRC(){  
+//  buffer8(8);
+//  buffer8(MSP_MYRC);
+//  for(int i=0; i<4;i++){
+//    buffer16(channels[i]);
+//  }
+//  sendBuffer();
+//}
 
-void sendMyAux(){    
-  buffer8(8);
-  buffer8(MSP_MYAUX);
-  for(int i=4; i<8;i++){
-    buffer16(channels[i]);
-  }
+void sendMyRC(){  
+  buffer8(4);
+  buffer8(MSP_MYRC);
+  
+  byte chans[8];
+    for(int i=0; i<4;i++){
+      byte TMP = map(channels[i],1000,2000,0,250);
+      buffer8(TMP);
+    }
+
   sendBuffer();
 }
 
@@ -50,15 +52,16 @@ void buffer8(byte a){
     toSend[buffCount] = a;
     checksum ^= a;
     buffCount++;
+    if(buffCount >= 42){ buffCount = 0; checksum=0; Serial.print("fail"); }
 }
 
 
 //Function to send the data once loaded
 void sendBuffer(){
   toSend[buffCount] = checksum; //checksum
-  mySerial.print("$M<");  
+  mySerial.print("$M<"); 
   for(int u=0;u<buffCount+2;u++){
-    mySerial.write(toSend[u]);
+    mySerial.write(toSend[u]);    
   }
   checksum=0;
   buffCount = 0;
