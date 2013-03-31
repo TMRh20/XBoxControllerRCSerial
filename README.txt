@@ -57,6 +57,9 @@ D: Horizon Mode
 R: n/a
 L: n/a
 
+Start: Enter LCD Menu after hold for 3 Seconds
+Back: Toggle Control Mode
+Black: Save and Exit LCD Menu
 
 ************************************************************************************
 
