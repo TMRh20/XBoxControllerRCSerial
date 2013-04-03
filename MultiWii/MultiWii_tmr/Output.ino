@@ -454,11 +454,12 @@ void initOutput() {
   #if defined(ESC_CALIB_CANNOT_FLY)
     writeAllMotors(ESC_CALIB_HIGH);
 //    delay(3000);
-//TMRh20 - delay longer to choose a different battery for Turnigy MultiStar 20A ESCs
-//should prevent LVC
-//delay(6000); //set battery to LiPo
-delay(11000); //to set battery to NIMH
-//delay(55000); //to set timing to HIGH
+  //TMRh20 - delay longer to choose a different battery for Turnigy MultiStar 20A ESCs
+    //should prevent LVC
+    //delay(6000); //set battery to LiPo
+    delay(11000); //to set battery to NIMH
+    //delay(55000); //to set timing to HIGH
+
     writeAllMotors(ESC_CALIB_LOW);
     delay(500);
     while (1) {
@@ -962,21 +963,21 @@ void mixTable() {
       #endif
       int16_t angleP,angleR;
       #ifdef TILT_PITCH_AUX_CH
-        angleP = TILT_PITCH_MIDDLE + rcData[TILT_PITCH_AUX_CH]-1500;
+        angleP = TILT_PITCH_MIDDLE - 1500 + rcData[TILT_PITCH_AUX_CH]-1500;
       #else
-        angleP = TILT_PITCH_MIDDLE;
+        angleP = TILT_PITCH_MIDDLE - 1500;
       #endif
       #ifdef TILT_ROLL_AUX_CH
-        angleR  = TILT_ROLL_MIDDLE  + rcData[TILT_ROLL_AUX_CH]-1500;
+        angleR  = TILT_ROLL_MIDDLE - 1500 + rcData[TILT_ROLL_AUX_CH]-1500;
       #else
-        angleR  = TILT_ROLL_MIDDLE;
+        angleR  = TILT_ROLL_MIDDLE - 1500;
       #endif
       if (rcOptions[BOXCAMSTAB]) {
         angleP += TILT_PITCH_PROP * angle[PITCH] /16 ;
         angleR += TILT_ROLL_PROP  * angle[ROLL]  /16 ;
       }
-      S_PITCH = constrain(angleP+angleR, TILT_PITCH_MIN, TILT_PITCH_MAX);
-      S_ROLL  = constrain(angleP-angleR, TILT_ROLL_MIN, TILT_ROLL_MAX);   
+      S_PITCH = constrain(1500+angleP-angleR, TILT_PITCH_MIN, TILT_PITCH_MAX);
+      S_ROLL  = constrain(1500-angleP-angleR, TILT_ROLL_MIN, TILT_ROLL_MAX);   
     #endif 
 
     #ifdef GIMBAL
@@ -1252,26 +1253,53 @@ void mixTable() {
       }
     }
   #endif
-  maxMotor=motor[0];
-  for(i=1;i< NUMBER_MOTOR;i++)
-    if (motor[i]>maxMotor) maxMotor=motor[i];
-  for (i = 0; i < NUMBER_MOTOR; i++) {
-    if (maxMotor > MAXTHROTTLE) // this is a way to still have good gyro corrections if at least one motor reaches its max.
-      motor[i] -= maxMotor - MAXTHROTTLE;
-    motor[i] = constrain(motor[i], conf.minthrottle, MAXTHROTTLE);
-    #if defined(ALTHOLD_FAST_THROTTLE_CHANGE)
-      if (rcData[THROTTLE] < MINCHECK)
-    #else
-      if ((rcData[THROTTLE] < MINCHECK) && !f.BARO_MODE)
-    #endif 
-      #ifndef MOTOR_STOP
-        motor[i] = conf.minthrottle;
+  /****************                normalize the Motors values                ******************/
+  #ifdef LEAVE_HEADROOM_FOR_MOTORS
+    // limit this leaving room for corrections to the first #n of all motors
+    maxMotor=motor[0];
+    for(i=1; i < LEAVE_HEADROOM_FOR_MOTORS; i++)
+      if (motor[i]>maxMotor) maxMotor=motor[i];
+    if (maxMotor > MAXTHROTTLE) { // this is a way to still have good gyro corrections if at least one motor reaches its max.
+      for(i=0; i < LEAVE_HEADROOM_FOR_MOTORS; i++)
+        motor[i] -= maxMotor - MAXTHROTTLE;
+    }
+    for (i = 0; i < NUMBER_MOTOR; i++) {
+      motor[i] = constrain(motor[i], conf.minthrottle, MAXTHROTTLE);
+      #if defined(ALTHOLD_FAST_THROTTLE_CHANGE)
+        if (rcData[THROTTLE] < MINCHECK)
       #else
-        motor[i] = MINCOMMAND;
+        if ((rcData[THROTTLE] < MINCHECK) && !f.BARO_MODE)
       #endif
-    if (!f.ARMED)
-      motor[i] = MINCOMMAND;
-  }
+        #ifndef MOTOR_STOP
+          motor[i] = conf.minthrottle;
+        #else
+          motor[i] = MINCOMMAND;
+        #endif
+      if (!f.ARMED)
+        motor[i] = MINCOMMAND;
+    }
+  #else // LEAVE_HEADROOM_FOR_MOTORS
+    maxMotor=motor[0];
+    for(i=1; i< NUMBER_MOTOR; i++)
+      if (motor[i]>maxMotor) maxMotor=motor[i];
+    for(i=0; i< NUMBER_MOTOR; i++) {
+      if (maxMotor > MAXTHROTTLE) // this is a way to still have good gyro corrections if at least one motor reaches its max.
+        motor[i] -= maxMotor - MAXTHROTTLE;
+      motor[i] = constrain(motor[i], conf.minthrottle, MAXTHROTTLE);
+      #if defined(ALTHOLD_FAST_THROTTLE_CHANGE)
+        if (rcData[THROTTLE] < MINCHECK)
+      #else
+        if ((rcData[THROTTLE] < MINCHECK) && !f.BARO_MODE)
+      #endif
+        #ifndef MOTOR_STOP
+          motor[i] = conf.minthrottle;
+        #else
+          motor[i] = MINCOMMAND;
+        #endif
+      if (!f.ARMED)
+        motor[i] = MINCOMMAND;
+    }
+  #endif // LEAVE_HEADROOM_FOR_MOTORS
   /****************                      Powermeter Log                    ******************/
   #if (LOG_VALUES >= 3) || defined(POWERMETER_SOFT)
     uint16_t amp, ampsum;

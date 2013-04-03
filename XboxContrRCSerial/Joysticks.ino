@@ -23,13 +23,13 @@ void getRollPitchYawThrottle( ){
     centerFix(pitch);
     centerFix(roll);   
     
-    if(altHold == 0){
+//    if(altHold == 0){
       *throttle = map(thrt,110,trigZero[0]-10,2000,1000); 
-    }else{
-      int tmpThr = map(thrt,110,trigZero[0]-10,2000,1000);
-      if(tmpThr > altThrottle + 50 || tmpThr < altThrottle - 50){ ledBlink(20); } else { }
-      *throttle=altThrottle;
-    }
+//    }else{
+//      int tmpThr = map(thrt,110,trigZero[0]-10,2000,1000);
+//      if(tmpThr > altThrottle + 50 || tmpThr < altThrottle - 50){ ledBlink(20); } else { }
+//      *throttle=altThrottle;
+//    }
 }
   
 

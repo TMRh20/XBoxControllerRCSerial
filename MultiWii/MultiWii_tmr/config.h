@@ -19,14 +19,13 @@
  *    Changing those values in config.h and upload will require a 'Reset' from the GUI to take effect
  */
 
-
+#define TMRh20
 /*************************************************************************************************/
 /*****************                                                                 ***************/
 /****************  SECTION  1 - BASIC SETUP                                                *******/
 /*****************                                                                 ***************/
 /*************************************************************************************************/
- 
-  #define TMRh20
+  
   /**************************    The type of multicopter    ****************************/
     //#define GIMBAL
     //#define BI
@@ -56,8 +55,8 @@
     //#define MINTHROTTLE 1120 // for Super Simple ESCs 10A
     //#define MINTHROTTLE 1064 // special ESC (simonk)
     //#define MINTHROTTLE 1050 // for brushed ESCs like ladybird
+    //#define MINTHROTTLE 1150 // (*)
     #define MINTHROTTLE 1175 // (*)
-
   /****************************    Motor maxthrottle    *******************************/
     /* this is the maximum value for the ESCs at full power, this value can be increased up to 2000 */
     #define MAXTHROTTLE 1850
@@ -68,8 +67,8 @@
     #define MINCOMMAND  1000
 
   /**********************************    I2C speed   ************************************/
-    #define I2C_SPEED 400000L     //100kHz normal mode, this value must be used for a genuine WMP
-    //#define I2C_SPEED 400000L   //400kHz fast mode, it works only with some WMP clones
+    //#define I2C_SPEED 100000L     //100kHz normal mode, this value must be used for a genuine WMP
+    #define I2C_SPEED 400000L   //400kHz fast mode, it works only with some WMP clones
 
   /***************************    Internal i2c Pullups   ********************************/
     /* enable internal I2C pull ups (in most cases it is better to use external pullups) */
@@ -103,6 +102,8 @@
       //#define SIRIUS          // Sirius Navigator IMU                                             <- confirmed by Alex
       //#define SIRIUSGPS       // Sirius Navigator IMU  using external MAG on GPS board            <- confirmed by Alex
       //#define SIRIUS600       // Sirius Navigator IMU  using the WMP for the gyro
+      //#define SIRIUS_AIR      // Sirius Navigator IMU 6050 32U4 from MultiWiiCopter.com
+      //#define SIRIUS_AIR_GPS  // Sirius Navigator IMU 6050 32U4 from MultiWiiCopter.com with GPS/MAG remote located
       //#define MINIWII         // Jussi's MiniWii Flight Controller                                <- confirmed by Alex
       //#define MICROWII        // MicroWii 10DOF with ATmega32u4, MPU6050, HMC5883L, MS561101BA from http://flyduino.net/
       //#define CITRUSv2_1      // CITRUS from qcrc.ca
@@ -140,25 +141,19 @@
       //#define HK_MultiWii_SE_V2  // Hobbyking board with MPU6050 + HMC5883L + BMP085
       //#define HK_MultiWii_328P   // Also labeled "Hobbybro" on the back.  ITG3205 + BMA180 + BMP085 + NMC5583L + DSM2 Connector (Spektrum Satellite)  
       //#define RCNet_FC           // RCNet FC with MPU6050 and MS561101BA  http://www.rcnet.com
-      //#define FLYDU_ULTRA   // MEGA+10DOF+MT3339 FC
+      //#define RCNet_FC_GPS       // RCNet FC with MPU6050 + MS561101BA + HMC5883L + UBLOX GPS http://www.rcnet.com
+      //#define FLYDU_ULTRA        // MEGA+10DOF+MT3339 FC
 
       
     /***************************    independent sensors    ********************************/
-    
-    #define MPU6050
-  #define HMC5883
-  //#define MS561101BA
-  //#define MPU6050_I2C_AUX_MASTER // MAG connected to the AUX I2C bus of MPU6050
-  #undef INTERNAL_I2C_PULLUPS
-  
-  
       /* leave it commented if you already checked a specific board above */
       /* I2C gyroscope */
       //#define WMP
       //#define ITG3200
       //#define L3G4200D
-//      define MPU6050       //combo + ACC
-//      #undef INTERNAL_I2C_PULLUPS
+      #define MPU6050       //combo + ACC
+      #undef INTERNAL_I2C_PULLUPS
+      
       /* I2C accelerometer */
       //#define NUNCHUCK  // if you want to use the nunckuk connected to a WMP
       //#define MMA7455
@@ -176,7 +171,7 @@
 
       /* I2C magnetometer */
       //#define HMC5843
-//      #define HMC5883
+      #define HMC5883
       //#define AK8975
       //#define MAG3110
 
@@ -188,23 +183,11 @@
 
       /* ADC accelerometer */ // for 5DOF from sparkfun, uses analog PIN A1/A2/A3
       //#define ADCACC
-      
-//        #define ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  = -X; accADC[PITCH]  = -Y; accADC[YAW]  =  Z;}
-//        #define GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] =  Y; gyroADC[PITCH] = -X; gyroADC[YAW] = -Z;}
-//        //#define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  X; magADC[PITCH]  =  Y; magADC[YAW]  = -Z;}
-//        #define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  -X; magADC[PITCH]  =  Y; magADC[YAW]  = Z;}
 
-        #define ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  = Y; accADC[PITCH]  = -X; accADC[YAW]  =  Z;}
-        #define GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] =  X; gyroADC[PITCH] = Y; gyroADC[YAW] = -Z;}
-        //#define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  X; magADC[PITCH]  =  Y; magADC[YAW]  = -Z;}
-        #define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  -Y; magADC[PITCH]  = -X; magADC[YAW]  = Z;}
-        
-  
-  
       /* enforce your individual sensor orientation - even overrides board specific defaults */
-      //#define FORCE_ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  =  Y; accADC[PITCH]  = -X; accADC[YAW]  = Z;}
-      //#define FORCE_GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] = -Y; gyroADC[PITCH] =  X; gyroADC[YAW] = Z;}
-      //#define FORCE_MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  X; magADC[PITCH]  =  Y; magADC[YAW]  = Z;}
+      #define FORCE_ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  = Y; accADC[PITCH]  = -X; accADC[YAW]  =  Z;}
+      #define FORCE_GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] =  X; gyroADC[PITCH] = Y; gyroADC[YAW] = -Z;}
+      #define FORCE_MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  -Y; magADC[PITCH]  = -X; magADC[YAW]  = Z;}
 
       /* Board orientation shift */
       /* If you have frame designed only for + mode and you cannot rotate FC phisycally for flying in X mode (or vice versa)
@@ -346,15 +329,11 @@
 
   /***********************      your individual mixing     ***********************/
     /* if you want to override an existing entry in the mixing table, you may want to avoid esditing the
-     * mixTable() function for every version again and again. Then you must
-     * 1) enable the correct copter type which resembles correct number of motors&servos
-     * 2) create a file with your choice of name which contains all the mixing code for motors and servos.
-     *    To get an idea, look at mixTable() function
-     * 3) enable your mixing code with this define; replace filename with your chosen name
-     *    (if you needed this info then probably this is not for you; start with an existing copter type and
-     *    predefined mixing table entry)
+     * mixTable() function for every version again and again. 
+     * howto: http://www.multiwii.com/wiki/index.php?title=Config.h#Individual_Mixing
      */
     //#define MY_PRIVATE_MIXING "filename.h"
+    //#define LEAVE_HEADROOM_FOR_MOTORS 4 // leave room for gyro corrrections only for first 4 motors
 
 /*************************************************************************************************/
 /*****************                                                                 ***************/
@@ -595,7 +574,7 @@
     #define FAILSAFE                                // uncomment  to activate the failsafe function
     #define FAILSAFE_DELAY     2                     // Guard time for failsafe activation after signal lost. 1 step = 0.1sec - 1sec in example
     #define FAILSAFE_OFF_DELAY 100                    // Time for Landing before motors stop in 0.1sec. 1 step = 0.1sec - 20sec in example
-    #define FAILSAFE_THROTTLE  (MINTHROTTLE + 195)    // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
+    #define FAILSAFE_THROTTLE  (MINTHROTTLE + 190)    // (*) Throttle level used for landing - may be relative to MINTHROTTLE - as in this case
 
 
   /*****************                DFRobot LED RING    *********************************/
@@ -639,6 +618,9 @@
        (allready done if the option RCAUXPIN12 is selected) */
     //#define DISABLE_POWER_PIN
 
+  /*******************************    OSD Switch    *************************************/
+    // This adds a box that can be interpreted by OSD in activation status (to switch on/off the overlay for instance)
+  //#define OSD_SWITCH
 
   /**************************************************************************************/
   /***********************                  TX-related         **************************/
@@ -710,7 +692,7 @@
 
     /* GPS navigation can control the heading */
     
-    #define NAV_CONTROLS_HEADING       false      // copter faces toward the navigation point, maghold must be enabled for it
+    #define NAV_CONTROLS_HEADING       true      // copter faces toward the navigation point, maghold must be enabled for it
     #define NAV_TAIL_FIRST             false     // true - copter comes in with tail first 
     #define NAV_SET_TAKEOFF_HEADING    true      // true - when copter arrives to home position it rotates it's head to takeoff direction
     
@@ -720,8 +702,8 @@
        Note the sign on declination it could be negative or positive (WEST or EAST) */
     //#define MAG_DECLINIATION  3.96f              //For Budapest Hungary.
     #define MAG_DECLINIATION  9.32f
-    //#define MAG_DECLINIATION  0.00f
-    //#define GPS_LEAD_FILTER                      // Adds a forward predictive filterig to compensate gps lag. Code based on Jason Short's lead filter implementation
+
+    #define GPS_LEAD_FILTER                      // Adds a forward predictive filterig to compensate gps lag. Code based on Jason Short's lead filter implementation
     
     //#define GPS_FILTERING                        // add a 5 element moving average filter to GPS coordinates, helps eliminate gps noise but adds latency comment out to disable
     #define GPS_WP_RADIUS              200       // if we are within this distance to a waypoint then we consider it reached (distance is in cm)
@@ -732,15 +714,7 @@
   /***********************        LCD/OLED - display settings       *********************/
   /**************************************************************************************/
 
-    /* uncomment this line if you plan to use a LCD or OLED */
-      #define LCD_CONF
-
-    /* to include setting the aux switches for AUX1 -> AUX4 via LCD */
-      //#define LCD_CONF_AUX
-
-    /* if program gets too large (>32k), need to exclude some functionality */
-      /* uncomment to suppress some unwanted aux3 aux4 items in config menu (only useful if LCD_CONF_AUX is enabled) */
-      //#define SUPPRESS_LCD_CONF_AUX34
+    /* http://www.multiwii.com/wiki/index.php?title=Extra_features#LCD_.2F_OLED */
 
     /*****************************   The type of LCD     **********************************/
       /* choice of LCD attached for configuration and telemetry, see notes below */
@@ -762,7 +736,6 @@
      * The lower part of each page is accessible under the name of shifted keyboard letter :
      * 1 - ! , 2 - @ , 3 - # , 4 - $ , 5 - % , 6 - ^ , 7 - & , 8 - * , 9 - (
      * You must add both to your lcd.telemetry.* sequences
-     *
      */
       //#define DISPLAY_FONT_DSIZE //currently only aplicable for OLED_I2C_128x64
 
@@ -781,56 +754,38 @@
       #define LCD_MENU_SAVE_EXIT 's'
       #define LCD_MENU_ABORT 'x'
 
-    /* To use an LCD03 for configuration:
-       http://www.robot-electronics.co.uk/htm/Lcd03tech.htm
-       Remove the jumper on its back to set i2c control.
-       VCC to +5V VCC (pin1 from top)
-       SDA - Pin A4 Mini Pro - Pin 20 Mega (pin2 from top)
-       SCL - Pin A5 Mini Pro - Pin 21 Mega (pin3 from top)
-       GND to Ground (pin4 from top)*/
-
-    /* To use an Eagle Tree Power Panel LCD for configuration:
-       White wire  to Ground
-       Red wire    to +5V VCC (or to the WMP power pin, if you prefer to reset everything on the bus when WMP resets)
-       Yellow wire to SDA - Pin A4 Mini Pro - Pin 20 Mega
-       Brown wire  to SCL - Pin A5 Mini Pro - Pin 21 Mega */
-
-    /* Cat's whisker LCD_TEXTSTAR LCD
-       Pleae note this display needs a full 4 wire connection to (+5V, Gnd, RXD, TXD )
-       Configure display as follows: 115K baud, and TTL levels for RXD and TXD, terminal mode
-       NO rx / tx line reconfiguration, use natural pins.
-       The four buttons sending 'A', 'B', 'C', 'D' are supported for configuration navigation and request of telemetry pages 1-4 */
-
-
   /**************************************************************************************/
-  /***********************                telemetry            **************************/
+  /***********************      LCD configuration menu         **************************/
   /**************************************************************************************/
 
-    /* to monitor system values (battery level, loop time etc. with LCD enable this
-       note: for now you must send single characters to request  different pages
-       Buttons toggle request for page on/off
-       The active page on the LCD does get updated automatically
-       Easy to use with Terminal application or display like LCD - if available uses the 4 preconfigured buttons  to send 'A', 'B', 'C', 'D' */
+    /* uncomment this line if you plan to use a LCD or OLED for tweaking parameters
+     * http://www.multiwii.com/wiki/index.php?title=Extra_features#Configuration_Menu */
+      #define LCD_CONF
+
+    /* to include setting the aux switches for AUX1 -> AUX4 via LCD */
+      //#define LCD_CONF_AUX
+
+    /* optional exclude some functionality - uncomment to suppress some unwanted telemetry pages */
+      //#define SUPPRESS_LCD_CONF_AUX34
+
+  /**************************************************************************************/
+  /***********************      LCD       telemetry            **************************/
+  /**************************************************************************************/
+
+    /* to monitor system values (battery level, loop time etc. with LCD 
+     * http://www.multiwii.com/wiki/index.php?title=LCD_Telemetry */
+
     /********************************    Activation     ***********************************/
     //#define LCD_TELEMETRY
 
-    /* to enable automatic hopping between a choice of telemetry pages uncomment this.
-       This may be useful if your LCD has no buttons or the sending is broken
-       hopping is activated and deactivated in unarmed mode with throttle=low & roll=left & pitch=forward
-       set it to the sequence of telemetry pages you want to see
-       2 line displays support pages 1-9
-       multiline displays support pages 1-5 */
+    /* to enable automatic hopping between a choice of telemetry pages uncomment this. */
     //#define LCD_TELEMETRY_AUTO "123452679" // pages 1 to 9 in ascending order
     //#define LCD_TELEMETRY_AUTO  "212232425262729" // strong emphasis on page 2
 
-    /* same as above, but manual stepping sequence; requires 
-       stick input (throttle=low & roll=right & pitch=forward) to 
-       step through each defined telemetry page
-       First page of the sequence gets loaded at startup to allow non-interactive display */
-    //#define LCD_TELEMETRY_STEP "0123456789" // should contain a 0 to allow switching off. First page of sequence gets loaded upon startup
+    /* manual stepping sequence; first page of the sequence gets loaded at startup to allow non-interactive display */
+    //#define LCD_TELEMETRY_STEP "0123456789" // should contain a 0 to allow switching off.
 
-    /* if program gets too large (>32k), need to exclude some functionality
-       uncomment to suppress some unwanted telemetry pages (only useful if telemetry is enabled) */
+    /* optional exclude some functionality - uncomment to suppress some unwanted telemetry pages */
     //#define SUPPRESS_TELEMETRY_PAGE_1
     //#define SUPPRESS_TELEMETRY_PAGE_2
     //#define SUPPRESS_TELEMETRY_PAGE_3
@@ -841,6 +796,9 @@
     //#define SUPPRESS_TELEMETRY_PAGE_8
     //#define SUPPRESS_TELEMETRY_PAGE_9
 
+  /********************************************************************/
+  /****                             RSSI                           ****/
+  /********************************************************************/
     //#define RX_RSSI
     //#define RX_RSSI_PIN A3
 
@@ -861,11 +819,11 @@
        vbat = [0;1023]*16/VBATSCALE
        must be associated with #define BUZZER ! */
     #define VBAT              // uncomment this line to activate the vbat code
-    #define VBATSCALE       117 // (*) change this value if readed Battery voltage is different than real voltage
+    #define VBATSCALE       131 // (*) change this value if readed Battery voltage is different than real voltage
     #define VBATNOMINAL     126 // 12,6V full battery nominal voltage - only used for lcd.telemetry
-    #define VBATLEVEL_WARN1 101 // (*) 10,7V
-    #define VBATLEVEL_WARN2  100 // (*) 9.9V
-    #define VBATLEVEL_CRIT   99 // (*) 9.3V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
+    #define VBATLEVEL_WARN1 107 // (*) 10,7V
+    #define VBATLEVEL_WARN2  99 // (*) 9.9V
+    #define VBATLEVEL_CRIT   93 // (*) 9.3V - critical condition: if vbat ever goes below this value, permanent alarm is triggered
     #define NO_VBAT          16  // (*) Avoid beeping without any battery
 
 
@@ -906,7 +864,7 @@
    * but if it's commented: Smooth alt change routine is activated, for slow auto and aerophoto modes (in general solution from alexmos). It's slowly increase/decrease 
    * altitude proportional to stick movement (+/-100 throttle gives about +/-50 cm in 1 second with cycle time about 3-4ms)
    */
-  //#define ALTHOLD_FAST_THROTTLE_CHANGE
+  #define ALTHOLD_FAST_THROTTLE_CHANGE
 
   /********************************************************************/
   /****           altitude variometer                              ****/

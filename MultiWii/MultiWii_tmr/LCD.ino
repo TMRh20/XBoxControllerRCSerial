@@ -505,7 +505,7 @@ void LCDprint(uint8_t i) {
     LCDPIN_ON //switch ON digital PIN 0
     delayMicroseconds(BITDELAY);
   #elif defined(LCD_TEXTSTAR) || defined(LCD_VT100) || defined(LCD_TTY)
-    SerialWrite(LCD_SERIAL_PORT, i ); 
+    SerialWrite(LCD_SERIAL_PORT, i );
   #elif defined(LCD_ETPP)
     i2c_ETPP_send_char(i);
   #elif defined(LCD_LCD03)
@@ -863,6 +863,7 @@ const char PROGMEM lcd_param_text52 [] = "AUX buzzer";
 const char PROGMEM lcd_param_text53 [] = "AUX vario ";
 const char PROGMEM lcd_param_text54 [] = "AUX calib ";
 const char PROGMEM lcd_param_text55 [] = "AUX govern";
+const char PROGMEM lcd_param_text56 [] = "AUX osd   ";
 // 53 to 61 reserved
 #endif
 #ifdef HELI_120_CCPM //                  0123456789
@@ -1082,6 +1083,14 @@ PROGMEM const void * const lcd_param_ptr_table [] = {
   #ifndef SUPPRESS_LCD_CONF_AUX34
     &lcd_param_text55, &conf.activate[BOXGOV],&__AUX3,
     &lcd_param_text55, &conf.activate[BOXGOV],&__AUX4,
+  #endif
+#endif
+#ifdef OSD_SWITCH
+  &lcd_param_text56, &conf.activate[BOXOSD],&__AUX1,
+  &lcd_param_text56, &conf.activate[BOXOSD],&__AUX2,
+  #ifndef SUPPRESS_LCD_CONF_AUX34
+    &lcd_param_text56, &conf.activate[BOXOSD],&__AUX3,
+    &lcd_param_text56, &conf.activate[BOXOSD],&__AUX4,
   #endif
 #endif
 #endif //lcd.conf.aux
@@ -1362,7 +1371,7 @@ void configurationLoop() {
     #endif
     #if defined(LCD_TEXTSTAR) || defined(LCD_VT100) || defined(LCD_TTY) // textstar, vt100 and tty can send keys
       key = ( SerialAvailable(LCD_SERIAL_PORT) ? SerialRead(LCD_SERIAL_PORT) : 0 );
-     #endif
+    #endif
     #ifdef LCD_CONF_DEBUG
       delay(1000);
       if (key == LCD_MENU_NEXT) key=LCD_VALUE_UP; else key = LCD_MENU_NEXT;
@@ -1631,6 +1640,9 @@ static char checkboxitemNames[][4] = {
     #ifdef GOVERNOR_P
       "Gov",
     #endif
+    #ifdef OSD_SWITCH
+      "OSD",
+    #endif
   ""};
 void output_checkboxitems() {
   for (uint8_t i=0; i<CHECKBOXITEMS; i++ ) {
@@ -1662,40 +1674,44 @@ void print_uptime(uint16_t sec) {
 #if GPS
 void fill_line1_gps_lat(uint8_t sat) {
   int32_t aGPS_latitude = abs(GPS_coord[LAT]);
-  strcpy_P(line1,PSTR(".---.-----      "));
+  strcpy_P(line1,PSTR(".---.-------    "));
   //                   0123456789012345
   line1[0] = GPS_coord[LAT]<0?'S':'N';
   if (sat) {
     line1[13] = '#';
     line1[14] = digit10(GPS_numSat);
     line1[15] = digit1(GPS_numSat);
-  }
-  line1[1] = '0' + aGPS_latitude / 10000000- (aGPS_latitude/100000000)* 10;
-  line1[2] = '0' + aGPS_latitude / 1000000 - (aGPS_latitude/10000000) * 10;
-  line1[3] = '0' + aGPS_latitude / 100000  - (aGPS_latitude/1000000)  * 10;
-  line1[5] = '0' + aGPS_latitude / 10000   - (aGPS_latitude/100000)   * 10;
-  line1[6] = '0' + aGPS_latitude / 1000 -    (aGPS_latitude/10000) * 10;
-  line1[7] = '0' + aGPS_latitude / 100  -    (aGPS_latitude/1000)  * 10;
-  line1[8] = '0' + aGPS_latitude / 10   -    (aGPS_latitude/100)   * 10;
-  line1[9] = '0' + aGPS_latitude        -    (aGPS_latitude/10)    * 10;
+  } //                                987654321
+  line1[1]  = '0' + aGPS_latitude  / 1000000000;
+  line1[2]  = '0' + aGPS_latitude  / 100000000 - (aGPS_latitude/1000000000) * 10;
+  line1[3]  = '0' + aGPS_latitude  / 10000000  - (aGPS_latitude/100000000)  * 10;
+  line1[5]  = '0' + aGPS_latitude  / 1000000   - (aGPS_latitude/10000000)   * 10;
+  line1[6]  = '0' + aGPS_latitude  / 100000    - (aGPS_latitude/1000000)    * 10;
+  line1[7]  = '0' + aGPS_latitude  / 10000     - (aGPS_latitude/100000)     * 10;
+  line1[8]  = '0' + aGPS_latitude  / 1000      - (aGPS_latitude/10000)      * 10;
+  line1[9]  = '0' + aGPS_latitude  / 100       - (aGPS_latitude/1000)       * 10;
+  line1[10] = '0' + aGPS_latitude  / 10        - (aGPS_latitude/100)        * 10;
+  line1[11] = '0' + aGPS_latitude              - (aGPS_latitude/10)         * 10;
 }
 void fill_line2_gps_lon(uint8_t status) {
   int32_t aGPS_longitude = abs(GPS_coord[LON]);
-  strcpy_P(line2,PSTR(".---.-----      "));
+  strcpy_P(line2,PSTR(".---.-------    "));
   //                   0123456789012345
   line2[0] = GPS_coord[LON]<0?'W':'E';
   if (status) {
     line2[13] = (GPS_update ? 'U' : '.');
     line2[15] = (GPS_Present ? 'P' : '.');
   }
-  line2[1] = '0' + aGPS_longitude / 10000000- (aGPS_longitude/100000000)* 10;
-  line2[2] = '0' + aGPS_longitude / 1000000 - (aGPS_longitude/10000000) * 10;
-  line2[3] = '0' + aGPS_longitude / 100000  - (aGPS_longitude/1000000)  * 10;
-  line2[5] = '0' + aGPS_longitude / 10000   - (aGPS_longitude/100000)   * 10;
-  line2[6] = '0' + aGPS_longitude / 1000    - (aGPS_longitude/10000) * 10;
-  line2[7] = '0' + aGPS_longitude / 100     - (aGPS_longitude/1000)  * 10;
-  line2[8] = '0' + aGPS_longitude / 10      - (aGPS_longitude/100)   * 10;
-  line2[9] = '0' + aGPS_longitude           - (aGPS_longitude/10)    * 10;
+  line2[1]  = '0' + aGPS_longitude / 1000000000;
+  line2[2]  = '0' + aGPS_longitude / 100000000 - (aGPS_longitude/1000000000) * 10;
+  line2[3]  = '0' + aGPS_longitude / 10000000  - (aGPS_longitude/100000000)  * 10;
+  line2[5]  = '0' + aGPS_longitude / 1000000   - (aGPS_longitude/10000000)   * 10;
+  line2[6]  = '0' + aGPS_longitude / 100000    - (aGPS_longitude/1000000)    * 10;
+  line2[7]  = '0' + aGPS_longitude / 10000     - (aGPS_longitude/100000)     * 10;
+  line2[8]  = '0' + aGPS_longitude / 1000      - (aGPS_longitude/10000)      * 10;
+  line2[9]  = '0' + aGPS_longitude / 100       - (aGPS_longitude/1000)       * 10;
+  line2[10] = '0' + aGPS_longitude / 10        - (aGPS_longitude/100)        * 10;
+  line2[11] = '0' + aGPS_longitude             - (aGPS_longitude/10)         * 10;
 }
 #endif
 

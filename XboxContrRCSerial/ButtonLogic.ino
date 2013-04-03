@@ -32,22 +32,22 @@ for(int i=2; i<10; i++){
       if(sel == 3){            //apply different actions depending on the mode specified by Back and Start buttons
                 buttonSend = 1; //bTimer=millis;
                 switch(i){
-                  case 2: *aux1 = 2000; break; //A 
-                  case 3: *aux1 = 1000; break; //B
-                  case 4: *aux2 = 1000; break; //Y
-                  case 5: *aux2 = 2000; break; //X
-                  case 6: *aux3 = 1000; altHold=0; break;
-                  case 7: *aux4 = 2000; break;
-                  case 8: *aux3 = 2000; altHold = 1; altThrottle=*throttle; break;
-                  case 9: *aux4 = 1000; break;
+                  case 2: *aux1 = 1000; break; //A 
+                  case 3: *aux2 = 2000; break; //B
+                  case 4: *aux1 = 2000; break; //Y
+                  case 5: *aux2 = 1000; break; //X
+                  case 6: *aux3 = 2000; break; //altHold = 1; altThrottle=*throttle; break;
+                  case 7: *aux3 = 1000; break; //altHold=0; break;
+                  case 8: *aux4 = 1000; break;
+                  case 9: *aux4 = 2000; break;
                 }
       }else
       if(sel == 0){
                 buttonSend = 1; //bTimer=millis;       
                 switch(i){
-                  case 2: *aux3 = 1000; altHold=0; break;
+                  case 2: *aux3 = 1000; break;//altHold=0; break;
                   case 3: *aux4 = 2000; break;
-                  case 4: *aux3 = 2000; altHold = 1; altThrottle=*throttle;break;
+                  case 4: *aux3 = 2000; break;//altHold = 1; altThrottle=*throttle;break;
                   case 5: *aux4 = 1000; break;  
                   case 6: *aux1 = 2000; break;
                   case 7: *aux1 = 1000; break;

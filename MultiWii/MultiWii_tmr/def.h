@@ -173,6 +173,9 @@
   #endif
 #endif
 
+#if defined(SIRIUS_AIR) || defined(SIRIUS_AIR_GPS)
+  #define RCAUX2PIND17
+#endif
 
 /**************************   atmega328P (Promini)  ************************************/
 #if defined(PROMINI)
@@ -982,6 +985,26 @@
   #define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  X; magADC[PITCH]  =  Y; magADC[YAW]  = -Z;}
 #endif
 
+#if defined(SIRIUS_AIR)
+  #define MPU6050
+  #define BMP085
+  #define ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  = X; accADC[PITCH]  =  Y; accADC[YAW]  =  Z;}
+  #define GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] = -Y; gyroADC[PITCH] = X; gyroADC[YAW] = -Z;}
+  #undef INTERNAL_I2C_PULLUPS
+  #define HWPWM6
+#endif
+
+#if defined(SIRIUS_AIR_GPS)
+  #define MPU6050
+  #define BMP085
+  #define HMC5883
+  #define ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  = X; accADC[PITCH]  =  Y; accADC[YAW]  =  Z;}
+  #define GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] = -Y; gyroADC[PITCH] = X; gyroADC[YAW] = -Z;}
+  #define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  -X; magADC[PITCH]  =  Y; magADC[YAW]  = Z;}   //normal Sirius MAG on top is X Y -Z
+  #undef INTERNAL_I2C_PULLUPS
+  #define HWPWM6
+#endif
+
 #if defined(MINIWII)
   #define ITG3200
   #define BMA180
@@ -1277,6 +1300,15 @@
   #define ACC_ORIENTATION(X, Y, Z)  {accADC[ROLL]  = -X; accADC[PITCH]  = -Y; accADC[YAW]  =  Z;}
   #define GYRO_ORIENTATION(X, Y, Z) {gyroADC[ROLL] =  Y; gyroADC[PITCH] = -X; gyroADC[YAW] = -Z;}
   #undef INTERNAL_I2C_PULLUPS
+  #define MINTHROTTLE 1050
+  #define MAXTHROTTLE 2000
+  #define EXT_MOTOR_RANGE
+  #define VBAT
+  #define VBATSCALE       54
+  #define VBATLEVEL_WARN1 10
+  #define VBATLEVEL_WARN2 10
+  #define VBATLEVEL_CRIT  10
+  #define NO_VBAT         10
 #endif
 
 #if defined(MEGAWAP_V2_STD) 
@@ -1298,6 +1330,17 @@
   #define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  X; magADC[PITCH]  =  Y; magADC[YAW]  = -Z;} 
   #define MPU6050_EN_I2C_BYPASS // MAG connected to the AUX I2C bus of MPU6050 
   #undef INTERNAL_I2C_PULLUPS 
+#endif
+
+#if defined(RCNet_FC_GPS)
+  #define RCNet_FC
+  #define HMC5883
+  #define MAG_ORIENTATION(X, Y, Z)  {magADC[ROLL]  =  -X; magADC[PITCH]  =  Y; magADC[YAW]  = Z;} 
+  #define MPU6050_I2C_AUX_MASTER // MAG connected to the AUX I2C bus of MPU6050
+  #undef INTERNAL_I2C_PULLUPS 
+  #define GPS_SERIAL 2
+  #define GPS_BAUD   115200
+  #define UBLOX 
 #endif
 
 #if defined(RCNet_FC) 

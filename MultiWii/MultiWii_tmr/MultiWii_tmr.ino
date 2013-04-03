@@ -1,7 +1,7 @@
 /*
 MultiWiiCopter by Alexandre Dubus
 www.multiwii.com
-July  2012     V2.1
+March  2013     V2.2
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -15,7 +15,7 @@ July  2012     V2.1
 
 
 #include <avr/pgmspace.h>
-#define  VERSION  213
+#define  VERSION  220
 
 /*********** RC alias *****************/
 enum rc {
@@ -102,6 +102,9 @@ enum box {
   #ifdef GOVERNOR_P
     BOXGOV,
   #endif
+  #ifdef OSD_SWITCH
+    BOXOSD,
+  #endif
   CHECKBOXITEMS
 };
 
@@ -151,6 +154,9 @@ const char boxnames[] PROGMEM = // names for dynamic generation of config GUI
   #ifdef GOVERNOR_P
     "GOVERNOR;"
   #endif
+  #ifdef OSD_SWITCH
+    "OSD SW;"
+  #endif
 ;
 
 const uint8_t boxids[] PROGMEM = {// permanent IDs associated to boxes. This way, you can rely on an ID number to identify a BOX function.
@@ -198,6 +204,9 @@ const uint8_t boxids[] PROGMEM = {// permanent IDs associated to boxes. This way
   #endif
   #ifdef GOVERNOR_P
     18, //"GOVERNOR;"
+  #endif
+  #ifdef OSD_SWITCH
+    19, //"OSD_SWITCH;"
   #endif
 };
 
@@ -572,7 +581,7 @@ void annexCode() { // this code is excetuted at each loop and won't interfere wi
       if (! (++vbatTimer % VBATFREQ)) {
         vbatRawArray[(ind++)%8] = analogRead(V_BATPIN);
         for (uint8_t i=0;i<8;i++) vbatRaw += vbatRawArray[i];
-        vbat = (vbatRaw*2) / VBATSCALE; // result is Vbatt in 0.1V steps
+        vbat = (vbatRaw*2) / conf.vbatscale; // result is Vbatt in 0.1V steps
       }
     #endif
     alarmHandler(); // external buzzer routine that handles buzzer events globally now
@@ -846,7 +855,7 @@ void servos2Neutral() {
     writeServos();
   #endif
   #ifdef AIRPLANE
-    for(i = 4; i<7 ;i++) servo[i] = 1500;
+    for(uint8_t i = 4; i<7 ;i++) servo[i] = 1500;
     writeServos();
   #endif
   #ifdef HELICOPTER
@@ -872,12 +881,12 @@ void loop () {
   static uint32_t rcTime  = 0;
   static int16_t initialThrottleHold;
   static uint32_t timestamp_fixated = 0;
-
-#if defined(RCSERIAL)
-  //tmrh
-  tmr();
-#endif
   
+  #if defined(RCSERIAL)
+    //tmrh
+    tmr();
+  #endif
+
   #if defined(SPEKTRUM)
     if (spekFrameFlags == 0x01) readSpektrum();
   #endif

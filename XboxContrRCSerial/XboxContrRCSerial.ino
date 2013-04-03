@@ -76,7 +76,7 @@ void loop(){
   //check button status
     buttonLogic(); //function for reading button status and determining what to do
   
-  unsigned long DL = 22000; //Adjust delay depending on command to be sent
+  unsigned long DL = 25000; //Adjust delay depending on command to be sent
   if(buttonSend){DL = 65000;}
   
   if(micros() - jTimer > DL){ //start sending dataCmds every 75ms
@@ -91,6 +91,7 @@ void loop(){
       bttnCnt++; if(bttnCnt >= 15){ bttnCnt=0; buttonSend = 0; }       
       sendRawRC();  //send the full data
     }else{
+      
       sendMyRC(); 
     }
     jTimer = micros();

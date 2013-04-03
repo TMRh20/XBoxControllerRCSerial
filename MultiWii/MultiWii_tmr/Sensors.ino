@@ -1348,7 +1348,7 @@ void ACC_init () {
   #if defined(FREEIMUv04)
     acc_1G = 255;
   #else
-    acc_1G = 255;
+    acc_1G = 512;
   #endif
 
   #if defined(MPU6050_I2C_AUX_MASTER)

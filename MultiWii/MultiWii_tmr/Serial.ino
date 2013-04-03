@@ -110,7 +110,6 @@ uint8_t read8()  {
 }
 
 void headSerialResponse(uint8_t err, uint8_t s) {
-  serialize8('*');   //TMRh20
   serialize8('$');
   serialize8('M');
   serialize8(err ? '!' : '>');
@@ -169,7 +168,7 @@ void serialCom() {
     #if defined(SPEKTRUM) && (UART_NUMBER > 1)
       #define SPEK_COND  && (SPEK_SERIAL_PORT != CURRENTPORT)
     #endif
-    while(SerialAvailable(CURRENTPORT) GPS_COND SPEK_COND) {
+    while (SerialAvailable(CURRENTPORT) GPS_COND SPEK_COND) {
       uint8_t bytesTXBuff = ((uint8_t)(serialHeadTX[CURRENTPORT]-serialTailTX[CURRENTPORT]))%TX_BUFFER_SIZE; // indicates the number of occupied bytes in TX buffer
       if (bytesTXBuff > TX_BUFFER_SIZE - 50 ) return; // ensure there is enough free TX buffer to go further (50 bytes margin)
       c = SerialRead(CURRENTPORT);
@@ -208,37 +207,22 @@ void serialCom() {
             evaluateCommand();  // we got a valid packet, evaluate it
           }
           c_state[CURRENTPORT] = IDLE;
-          
         }
       #endif // SUPPRESS_ALL_SERIAL_MSP
-      //if(CURRENTPORT==3){break;}
     }
   }
 }
 #ifndef SUPPRESS_ALL_SERIAL_MSP
 void evaluateCommand() {
   boolean noTail =0;
-  byte playVal = 0;
   switch(cmdMSP[CURRENTPORT]) {
-//   case MSP_SET_RAW_RC:
-//     for(uint8_t i=0;i<8;i++) {
-//       rcData[i] = read16();
-//     }
-//     headSerialReply(0);
-//     break;
-   
-//   //tmrh20 
-     
+    
    case MSP_MY_RC:
     for(uint8_t i=0;i<4;i++) {
        rcData[i] = map(read8(),0,250,1000,2000);       
     }
     noTail=1;
-    #if defined(RCSERIAL)
-      if(f.ARMED ){
-        tryNSendInfo();
-      }
-    #endif
+    
     ++rxCnt1;
     rcTimer=millis();
     break;
@@ -248,19 +232,18 @@ void evaluateCommand() {
        rcData[i] = read16();
      }
      rcTimer=millis();
-   break;  
-     
+   break;
+   
    case MSP_SET_RAW_RC:
      for(uint8_t i=0;i<8;i++) {
        rcData[i] = read16();
      }
+     //TMRh20
      ++rxCnt1;
      noTail=1;
+     rcTimer=millis(); 
      //headSerialReply(0);
-     //TMRh20
-     rcTimer=millis();     
-   break;
-     
+     break;
    #if GPS
    case MSP_SET_RAW_GPS:
      f.GPS_FIX = read8();
@@ -370,6 +353,9 @@ void evaluateCommand() {
                  #endif
                  #if defined(GOVERNOR_P)
                    rcOptions[BOXGOV]<<BOXGOV |
+                 #endif
+                 #if defined(OSD_SWITCH)
+                   rcOptions[BOXOSD]<<BOXOSD |
                  #endif
                  f.ARMED<<BOXARM);
        serialize8(global_conf.currentSet);   // current setting
@@ -487,7 +473,7 @@ void evaluateCommand() {
      {
        int32_t lat = 0,lon = 0;
        uint8_t wp_no = read8();        //get the wp number  
-       headSerialReply(12);
+       headSerialReply(18);
        if (wp_no == 0) {
          lat = GPS_home[LAT];
          lon = GPS_home[LON];
@@ -576,7 +562,8 @@ void evaluateCommand() {
      break;
   }
   //TMRh20
-  if(!noTail){ tailSerialReply(); }
+  if(!noTail){ tailSerialReply(); noTail=0;}
+  //tailSerialReply();  
 }
 #endif // SUPPRESS_ALL_SERIAL_MSP
 
