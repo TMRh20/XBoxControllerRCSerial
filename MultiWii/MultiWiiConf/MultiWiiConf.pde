@@ -12,7 +12,8 @@ import javax.swing.JOptionPane; // for message dialogue
 PrintWriter output;
 BufferedReader reader;
 String portnameFile="SerialPort.txt"; // Name of file for Autoconnect.
-int GUI_BaudRate = 115200; // Default.
+int GUI_BaudRate = 57600; // Default.
+//int GUI_BaudRate = 115200; // Default.
 int SerialPort;
 
 Serial g_serial;

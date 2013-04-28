@@ -12,7 +12,7 @@ import javax.swing.JOptionPane; // for message dialogue
 PrintWriter output;
 BufferedReader reader;
 String portnameFile="SerialPort.txt"; // Name of file for Autoconnect.
-int GUI_BaudRate = 115200; // Default.
+int GUI_BaudRate = 57600; // Default.
 int SerialPort;
 
 Serial g_serial;
@@ -445,6 +445,7 @@ void sendRequestMSP(List<Byte> msp) {
     arr[i++] = b;
   }
   g_serial.write(arr); // send the complete byte sequence in one go
+  
 }
 
 public void evaluateCommand(byte cmd, int dataSize) {
@@ -617,7 +618,7 @@ void draw() {
   if (init_com==1 && graph_on==1) {
     time=millis();
 
-    if ((time-time4)>40 ) {
+    if ((time-time4)>80 ) {
       time4=time;
       accROLL.addVal(ax);accPITCH.addVal(ay);accYAW.addVal(az);gyroROLL.addVal(gx);gyroPITCH.addVal(gy);gyroYAW.addVal(gz);
       magxData.addVal(magx);magyData.addVal(magy);magzData.addVal(magz);
@@ -625,12 +626,14 @@ void draw() {
       debug1Data.addVal(debug1);debug2Data.addVal(debug2);debug3Data.addVal(debug3);debug4Data.addVal(debug4);
     }
 
-    if ((time-time2)>40 && ! toggleRead && ! toggleWrite && ! toggleSetSetting) {
+//    if ((time-time2)>40 && ! toggleRead && ! toggleWrite && ! toggleSetSetting) {
+    if ((time-time2)>80 && ! toggleRead && ! toggleWrite && ! toggleSetSetting) {
       time2=time;
       int[] requests = {MSP_STATUS, MSP_RAW_IMU, MSP_SERVO, MSP_MOTOR, MSP_RC, MSP_RAW_GPS, MSP_COMP_GPS, MSP_ALTITUDE, MSP_BAT, MSP_DEBUGMSG, MSP_DEBUG};
       sendRequestMSP(requestMSP(requests));
     }
-    if ((time-time3)>20 && ! toggleRead && ! toggleWrite && ! toggleSetSetting) {
+//    if ((time-time3)>20 && ! toggleRead && ! toggleWrite && ! toggleSetSetting) {
+    if ((time-time3)>40 && ! toggleRead && ! toggleWrite && ! toggleSetSetting) {
       sendRequestMSP(requestMSP(MSP_ATTITUDE));
       time3=time;
     }
