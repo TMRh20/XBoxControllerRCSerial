@@ -1,8 +1,8 @@
 #include <MemoryFree.h>
 
 #include <SoftwareSerial.h>
-#include <avr/sleep.h>
-#include <avr/power.h>
+//#include <avr/sleep.h>
+//#include <avr/power.h>
 
 #define rxPin 10 //not actually used
 #define txPin 11 
@@ -19,13 +19,13 @@ int *aux1= &channels[4],*aux2=&channels[5],*aux3=&channels[6],*aux4=&channels[7]
 int altThrottle = 1000, bttnCnt = 0;;
 int trigZero[3] = {1,1};
 
-unsigned long jTimer = 0, slpTimer = 0, blinkLength = 0;;
+unsigned long jTimer = 0, blinkLength = 0; //slpTimer = 0
 char toSend[45];
 byte checksum = 0;
 boolean altHold = 0;
 boolean buttonSend = 0;
 unsigned long lcdTimer = 0;
-
+unsigned long tmpTimer = 0;
 
 void setup(){
   
@@ -71,7 +71,7 @@ void loop(){
   
 
   //sleep if throttle not being applied for 5 seconds or more
-  if(micros() - slpTimer > 5000000){digitalWrite(13,LOW); sleepNow();}
+  //if(micros() - slpTimer > 5000000){digitalWrite(13,LOW); sleepNow();}
     
   //check button status
     buttonLogic(); //function for reading button status and determining what to do
@@ -83,9 +83,9 @@ void loop(){
     
     getRollPitchYawThrottle(); //function to get readings from joysticks
     
-    if(*throttle > 1010){ //1005//if throttle is being applied, reset sleep timer
-      slpTimer = micros();
-    }   
+//    if(*throttle > 1010){ //1005//if throttle is being applied, reset sleep timer
+//      slpTimer = micros();
+//    }   
     
     if(buttonSend){
       bttnCnt++; if(bttnCnt >= 15){ bttnCnt=0; buttonSend = 0; }       
@@ -96,6 +96,16 @@ void loop(){
     }
     jTimer = micros();
   }
+//
+//  if(millis() - tmpTimer > 500){
+//    tmpTimer = millis();
+//    //Serial.println("rp:");
+//    //Serial.println(*roll);
+//    //Serial.println(*pitch);
+//    Serial.println(*yaw);
+//  
+//  }
+
 }
 
 

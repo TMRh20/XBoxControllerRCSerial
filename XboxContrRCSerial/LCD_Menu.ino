@@ -5,20 +5,20 @@
 void lcdMenu(){
   
   if(micros() - lcdTimer < 3000000){ return; } //If Start button has been held for 3 seconds
-  digitalWrite(13,LOW); //LED ON
+  digitalWrite(13,HIGH); //LED ON
   
   boolean lcdSaved = 0;
   delay(250);
   
   //Enter the LCD menu by sending RC commands
   //Set the yaw to the right and pitch forward:
-  for(int i=0; i<1;i++){
+  for(int i=0; i<10;i++){
     buffer8(4);
     buffer8(MSP_MYRC);
     buffer8(125); //Roll,Pitch,Yaw,Throttle
-    buffer8(248);
-    buffer8(248);
-    buffer8(1);
+    buffer8(250);
+    buffer8(250);
+    buffer8(0);
     sendBuffer();
     delay(100);
   }
